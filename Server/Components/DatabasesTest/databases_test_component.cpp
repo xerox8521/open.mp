@@ -42,6 +42,12 @@ struct DatabasesTestComponent final : public IComponent, public NoCopy
 		return ComponentType::Other;
 	}
 
+	/// Get the component's version
+	SemanticVersion componentVersion() const override
+	{
+		return SemanticVersion(OMP_VERSION_MAJOR, OMP_VERSION_MINOR, OMP_VERSION_PATCH, BUILD_NUMBER);
+	}
+
 	/// Called for every component after components have been loaded
 	/// Should be used for storing the core interface, registering player/core event handlers
 	/// Should NOT be used for interacting with other components as they might not have been initialised yet
@@ -70,7 +76,7 @@ struct DatabasesTestComponent final : public IComponent, public NoCopy
 					return;
 				}
 				core->printLn("Database connection ID: %d (0x%x)", database_connection_id, database_connection_id);
-				core->printLn("Database connection pointer: 0x%x", database_connection);
+				core->printLn("Database connection pointer: 0x%p", database_connection);
 				IDatabaseResultSet* result_set(database_connection->executeQuery(testQuery));
 				if (result_set)
 				{
@@ -89,7 +95,7 @@ struct DatabasesTestComponent final : public IComponent, public NoCopy
 						return;
 					}
 					core->printLn("Result set ID: %d (0x%x)", result_set_id, result_set_id);
-					core->printLn("Result set pointer: 0x%x", result_set);
+					core->printLn("Result set pointer: 0x%p", result_set);
 					core->printLn("Row count: %d", row_count);
 					std::size_t field_count(result_set->getFieldCount());
 					if (field_count != static_cast<std::size_t>(3))
@@ -319,15 +325,15 @@ struct DatabasesTestComponent final : public IComponent, public NoCopy
 	/// "true" if validation was successful, otherwise "false"
 	inline bool validateFieldInteger(IDatabaseResultSet* databaseResultSet, int fieldIndex, long expectedFieldInteger)
 	{
-		long field_integer(databaseResultSet->getFieldInteger(fieldIndex));
+		long field_integer(databaseResultSet->getFieldInt(fieldIndex));
 		bool ret(field_integer == expectedFieldInteger);
 		if (ret)
 		{
-			core->printLn("result_set->getFieldInteger at field index \"%d\": \"%d\"", fieldIndex, field_integer);
+			core->printLn("result_set->getFieldInteger at field index \"%d\": \"%ld\"", fieldIndex, field_integer);
 		}
 		else
 		{
-			core->printLn("[ERROR] Field integer: \"%d\" at field index \"%d\". Expected it to be \"%d\".", field_integer, fieldIndex, expectedFieldInteger);
+			core->printLn("[ERROR] Field integer: \"%ld\" at field index \"%d\". Expected it to be \"%ld\".", field_integer, fieldIndex, expectedFieldInteger);
 		}
 		return ret;
 	}
@@ -379,15 +385,15 @@ struct DatabasesTestComponent final : public IComponent, public NoCopy
 	/// "true" if validation was successful, otherwise "false"
 	inline bool validateFieldIntegerByName(IDatabaseResultSet* databaseResultSet, const char* fieldName, long expectedFieldInteger)
 	{
-		long field_integer(databaseResultSet->getFieldIntegerByName(fieldName));
+		long field_integer(databaseResultSet->getFieldIntByName(fieldName));
 		bool ret(field_integer == expectedFieldInteger);
 		if (ret)
 		{
-			core->printLn("result_set->getFieldIntegerByName at field name \"%s\": \"%d\"", fieldName, field_integer);
+			core->printLn("result_set->getFieldIntegerByName at field name \"%s\": \"%ld\"", fieldName, field_integer);
 		}
 		else
 		{
-			core->printLn("[ERROR] Field integer: \"%d\" at field name \"%s\". Expected it to be \"%d\".", field_integer, fieldName, expectedFieldInteger);
+			core->printLn("[ERROR] Field integer: \"%ld\" at field name \"%s\". Expected it to be \"%ld\".", field_integer, fieldName, expectedFieldInteger);
 		}
 		return ret;
 	}
@@ -411,6 +417,13 @@ struct DatabasesTestComponent final : public IComponent, public NoCopy
 		}
 		return ret;
 	}
+
+	/// Frees the component data
+	void free() override { }
+
+	/// Reset the component data (on GMX)
+	void reset() override { }
+
 } databasesTestComponent;
 
 COMPONENT_ENTRY_POINT()
