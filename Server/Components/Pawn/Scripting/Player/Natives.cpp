@@ -1195,3 +1195,8 @@ SCRIPT_API(IsPlayerCuffed, bool(IPlayer& player))
 	}
 	return false;
 }
+
+SCRIPT_API(IsPlayerUsingOmp, int(IPlayer& player))
+{
+	return player.isUsingOmp();
+}
